@@ -226,8 +226,8 @@
             "name": "profiles",
             "type": "profile_table",
             "index_type": "i64",
-            "key_names": ["key"],
-            "key_types": ["name"]
+            "key_names": ["key", "ownerkey"],
+            "key_types": ["name", "name"]
         },
         {
             "name": "public",
