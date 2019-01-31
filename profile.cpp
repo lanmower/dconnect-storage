@@ -16,7 +16,7 @@ CONTRACT profile : public contract {
 
           auto idx = profiletab.get_index<"ownerkey"_n>();
           auto itr = idx.lower_bound(account.value);
-	  while (itr != idx.end() && itr->key.value != key.value && itr->owner.value != account.value) {itr++;}
+	  while (itr != idx.end() && (itr->key.value != key.value || itr->owner.value != account.value)) {itr++;}
           if ( itr == idx.end() ) {
             print("create");
             profiletab.emplace( _self, [&]( auto& u ) {
@@ -37,21 +37,18 @@ CONTRACT profile : public contract {
 
       ACTION eraseprofile(name account, name key) {
          require_auth(account);
-
-          auto idx = profiletab.get_index<"ownerkey"_n>();
-          auto itr = idx.lower_bound(account.value);
-	  while (itr != idx.end() && itr->key.value != key.value) {itr++;}
-          eosio_assert(itr->owner.value == account.value, "only the owner is allowed to modify this content");
-          eosio_assert(itr != idx.end(), "not found");
-	  profiletab.erase(*itr);
+         auto idx = profiletab.get_index<"ownerkey"_n>();
+         auto itr = idx.lower_bound(account.value);
+         while (itr != idx.end() && itr->key.value != key.value && itr->owner.value != account.value) {itr++;}
+         eosio_assert(itr != idx.end(), "not found");
+         eosio_assert(itr->owner== account, "only the owner is allowed to modify this content");
+         profiletab.erase(*itr);
       }
 
       ACTION setpublic(name account, name key, std::string value) {
          require_auth(account);
           auto idx = publictab.get_index<"key"_n>();
           auto itr = idx.lower_bound(key.value);
-	  print(itr->key.value," ");
-	  print(key.value);
           if ( itr == idx.end() || itr->key.value != key.value ) {
               publictab.emplace( _self, [&]( auto& u ) {
                   u.primary = publictab.available_primary_key();
@@ -71,13 +68,11 @@ CONTRACT profile : public contract {
 
       ACTION erasepublic(name account, name key) {
          require_auth(account);
-
-          auto idx = publictab.get_index<"key"_n>();
-          auto itr = idx.lower_bound(account.value);
-	  while (itr != idx.end() && itr->key.value != key.value) {itr++;}
-          eosio_assert(itr->owner.value == account.value, "only the owner is allowed to modify this content");
-          eosio_assert(itr != idx.end(), "not found");
-	  publictab.erase(*itr);
+         auto idx = publictab.get_index<"key"_n>();
+         auto itr = idx.lower_bound(key.value);
+         eosio_assert(itr != idx.end(), "not found");
+         eosio_assert(itr->owner== account, "only the owner is allowed to modify this content");
+	 publictab.erase(*itr);
       }
 
       ACTION setpost(name account, name key, std::string value) {
@@ -105,13 +100,11 @@ CONTRACT profile : public contract {
       
       ACTION erasepost(name account, name key) {
          require_auth(account);
-
-          auto idx = posttab.get_index<"key"_n>();
-          auto itr = idx.lower_bound(account.value);
-	  while (itr != idx.end() && itr->key.value != key.value) {itr++;}
-          eosio_assert(itr->owner.value == account.value, "only the owner is allowed to modify this content");
-          eosio_assert(itr != idx.end(), "not found");
-	  posttab.erase(*itr);
+         auto idx = posttab.get_index<"key"_n>();
+         auto itr = idx.lower_bound(key.value);
+         eosio_assert(itr != idx.end(), "not found");
+         eosio_assert(itr->owner== account, "only the owner is allowed to modify this content");
+	 posttab.erase(*itr);
       }
 
       TABLE profile_table {
@@ -161,4 +154,4 @@ CONTRACT profile : public contract {
         post_tables posttab;
 };
 
-EOSIO_DISPATCH( profile, (setprofile)(setpublic)(setpost) )
+EOSIO_DISPATCH( profile, (setprofile)(setpublic)(setpost)(editpost)(erasepost)(erasepublic)(eraseprofile) )
