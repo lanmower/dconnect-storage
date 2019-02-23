@@ -2,85 +2,30 @@
 
 using namespace eosio;
 
-CONTRACT profile : public contract {
+CONTRACT eosio_storage: public contract {
   public:
       using contract::contract;
-      profile( name receiver, name code, datastream<const char*> ds )
+      eosio_storage( name receiver, name code, datastream<const char*> ds )
          : contract(receiver, code, ds),
-	profiletab(receiver, receiver.value),
-	posttab(receiver, receiver.value),
-	publictab(receiver, receiver.value) {}
+	posttab(receiver, receiver.value) {}
 
-      ACTION setprofile(name account, name key, std::string value) {
-         require_auth(account);
 
-          auto idx = profiletab.get_index<"ownerkey"_n>();
-          auto itr = idx.lower_bound(account.value);
-	  while (itr != idx.end() && (itr->key.value != key.value || itr->owner.value != account.value)) {itr++;}
-          if ( itr == idx.end() ) {
-            print("create");
-            profiletab.emplace( _self, [&]( auto& u ) {
-              u.primary = profiletab.available_primary_key();
-              u.key = key;
-              u.value = value;
-              u.owner = account;
-              u.created = now();
-            });
-          } else {
-            eosio_assert(itr->owner.value == account.value, "only the owner is allowed to modify this content");
-            profiletab.modify( *itr, _self, [&]( auto& row ) {
-              row.value = value;
-	      row.modified = now();
-            });
-          }
-      }
-
-      ACTION eraseprofile(name account, name key) {
-         require_auth(account);
-         auto idx = profiletab.get_index<"ownerkey"_n>();
-         auto itr = idx.lower_bound(account.value);
-         while (itr != idx.end() && itr->key.value != key.value && itr->owner.value != account.value) {itr++;}
-         eosio_assert(itr != idx.end(), "not found");
-         eosio_assert(itr->owner== account, "only the owner is allowed to modify this content");
-         profiletab.erase(*itr);
-      }
-
-      ACTION setpublic(name account, name key, std::string value) {
-         require_auth(account);
-          auto idx = publictab.get_index<"key"_n>();
-          auto itr = idx.lower_bound(key.value);
-          if ( itr == idx.end() || itr->key.value != key.value ) {
-              publictab.emplace( _self, [&]( auto& u ) {
-                  u.primary = publictab.available_primary_key();
-                  u.key = key;
-                  u.value = value;
-                  u.owner = account;
-	          u.created = now();
-              });
-          } else {
-	      eosio_assert(itr->owner.value == account.value, "only the owner is allowed to modify this content");
-              publictab.modify( *itr, _self, [&]( auto& row ) {
-                row.value = value;
-                row.modified = now();
-              });
-          }
-      }
-
-      ACTION erasepublic(name account, name key) {
-         require_auth(account);
-         auto idx = publictab.get_index<"key"_n>();
-         auto itr = idx.lower_bound(key.value);
-         eosio_assert(itr != idx.end(), "not found");
-         eosio_assert(itr->owner== account, "only the owner is allowed to modify this content");
-	 publictab.erase(*itr);
-      }
-
-      ACTION setpost(name account, name key, std::string value) {
+      ACTION set(name account, name key, std::string value) {
          require_auth(account);
          print("create", key.value);
+         uint64_t pk = posttab.available_primary_key();
 
          posttab.emplace( _self, [&]( auto& u ) {
-             u.primary = posttab.available_primary_key();
+             u.primary = pk;
+             u.key = key;
+             u.value = value;
+             u.owner = account;
+	     u.created = now();
+         });
+
+	 post_tables postusertab(_self, account.value);
+         postusertab.emplace( _self, [&]( auto& u ) {
+             u.primary = pk;
              u.key = key;
              u.value = value;
              u.owner = account;
@@ -88,26 +33,34 @@ CONTRACT profile : public contract {
          });
       }
 
-      ACTION editpost(name account, uint64_t primary, std::string value) {
+      ACTION edit(name account, uint64_t primary, std::string value) {
          require_auth(account);
 	 auto itr = posttab.find(primary);
+         eosio_assert(itr != posttab.end(), "not found");
          eosio_assert(itr->owner.value == account.value, "only the owner is allowed to modify this content");
          posttab.modify( itr, _self, [&]( auto& row ) {
            row.value = value;
            row.modified = now();
          });
+	 post_tables postusertab(_self, account.value);
+         postusertab.modify( postusertab.find(primary), _self, [&]( auto& row ) {
+           row.value = value;
+           row.modified = now();
+         });
       }
       
-      ACTION erasepost(name account, name key) {
+      ACTION erase(name account, uint64_t primary) {
          require_auth(account);
-         auto idx = posttab.get_index<"key"_n>();
-         auto itr = idx.lower_bound(key.value);
-         eosio_assert(itr != idx.end(), "not found");
+	 auto itr = posttab.find(primary);
+         eosio_assert(itr != posttab.end(), "not found");
          eosio_assert(itr->owner== account, "only the owner is allowed to modify this content");
-	 posttab.erase(*itr);
+	 posttab.erase(itr);
+	 post_tables postusertab(_self, account.value);
+	 postusertab.erase(postusertab.find(primary));
       }
 
-      TABLE profile_table {
+
+      TABLE post_table {
          uint64_t primary;
          name key;
          name owner;
@@ -119,39 +72,13 @@ CONTRACT profile : public contract {
          uint64_t by_owner() const { return owner.value; }
       };
 
-      TABLE public_table {
-         uint64_t primary;
-         name key;
-	 name owner;
-         std::string value;
-	 uint32_t created;       
-	 uint32_t modified;       
-         uint64_t primary_key() const { return primary; }
-         uint64_t by_key() const { return key.value; }
-      };
+      typedef eosio::multi_index<"post"_n, post_table,  eosio::indexed_by<"key"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_key>>,  eosio::indexed_by<"ownerkey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_owner>>> post_tables;
 
-      TABLE post_table {
-         uint64_t primary;
-         name key;
-         name owner;
-         std::string value;
-	 uint32_t created;       
-	 uint32_t modified;       
-         uint64_t primary_key() const { return primary; }
-         uint64_t by_key() const { return key.value; }
-      };
-
-      typedef eosio::multi_index<"profiles"_n, profile_table,  eosio::indexed_by<"key"_n, eosio::const_mem_fun<profile_table, uint64_t, &profile_table::by_key>>,  eosio::indexed_by<"ownerkey"_n, eosio::const_mem_fun<profile_table, uint64_t, &profile_table::by_owner>>> profile_tables;
-      typedef eosio::multi_index<"public"_n, public_table,  eosio::indexed_by<"key"_n, eosio::const_mem_fun<public_table, uint64_t, &public_table::by_key>>> public_tables;
-      typedef eosio::multi_index<"post"_n, post_table,  eosio::indexed_by<"key"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_key>>> post_tables;
-
-      using setprofile_action   = action_wrapper<"setprofile"_n, &profile::setprofile>;
-      using setpublic_action   = action_wrapper<"setpublic"_n, &profile::setpublic>;
-      using setpost_action   = action_wrapper<"setpost"_n, &profile::setpost>;
+      using set_action   = action_wrapper<"set"_n, &eosio_storage::set>;
+      using edit_action   = action_wrapper<"edit"_n, &eosio_storage::edit>;
+      using erase_action   = action_wrapper<"erase"_n, &eosio_storage::erase>;
       private:
-        profile_tables profiletab;
-        public_tables publictab;
         post_tables posttab;
 };
 
-EOSIO_DISPATCH( profile, (setprofile)(setpublic)(setpost)(editpost)(erasepost)(erasepublic)(eraseprofile) )
+EOSIO_DISPATCH( eosio_storage, (set)(edit)(erase) )
