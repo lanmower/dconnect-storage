@@ -1,0 +1,109 @@
+{
+    "version": "eosio::abi/1.1",
+    "structs": [
+        {
+            "name": "post_table",
+            "base": "",
+            "fields": [
+                {
+                    "name": "primary",
+                    "type": "uint64"
+                },
+                {
+                    "name": "key",
+                    "type": "name"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "set",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "key",
+                    "type": "name"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "erase",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "key",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "edit",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "key",
+                    "type": "name"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                }
+            ]
+        }
+    ],
+    "types": [
+],
+    "actions": [
+        {
+            "name": "set",
+            "type": "set",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "edit",
+            "type": "edit",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "erase",
+            "type": "erase",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "post",
+            "type": "post_table",
+            "index_type": "i64",
+            "key_names": ["key", "ownerKey"],
+            "key_types": ["name", "name"]
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": [],
+    "abi_extensions": []
+
+}
