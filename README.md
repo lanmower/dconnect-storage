@@ -33,7 +33,9 @@ precede each action with the users name
 #### primary - primary key of item
 #### value - value to apply
 
-You can read items either from global scope, or scoped to the user as follows
+# Reading tables
+
+You can read items either from global scope
 ```cleos -u https://dconnect.live get table <contract name> <contract name> post```
 
 You can also read items from user scope (look at this as the users profile)
