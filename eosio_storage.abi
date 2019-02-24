@@ -50,8 +50,8 @@
                     "type": "name"
                 },
                 {
-                    "name": "key",
-                    "type": "name"
+                    "name": "primary",
+                    "type": "uint64"
                 }
             ]
         },
@@ -64,8 +64,8 @@
                     "type": "name"
                 },
                 {
-                    "name": "key",
-                    "type": "name"
+                    "name": "primary",
+                    "type": "uint64"
                 },
                 {
                     "name": "value",
