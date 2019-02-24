@@ -18,7 +18,7 @@ username - freedom first username
 key - username type index for path/key separation
 value - value to apply
 
-# TIP: You will get the primary key for an entry when you read it...
+#### TIP: You will get the primary key for an entry when you read it...
 
 ```cleos push action <contract name> edit '[ "<user name>","<primary key>" ]' -p <user name>@active```
 # EDIT - modify an entry
