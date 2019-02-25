@@ -34,7 +34,7 @@ CONTRACT eosio_storage: public contract {
 	     u.created = now();
          });
 
-	 post_tables postapptab(_self, name.value);
+	 post_tables postapptab(_self, app.value);
          postapptab.emplace( _self, [&]( auto& u ) {
              u.primary = pk;
              u.key = key;
