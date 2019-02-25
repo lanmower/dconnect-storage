@@ -28,6 +28,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "app",
+                    "type": "name"
+                },
+                {
                     "name": "account",
                     "type": "name"
                 },
@@ -38,10 +42,6 @@
                 {
                     "name": "value",
                     "type": "string"
-                },
-                {
-                    "name": "app",
-                    "type": "name"
                 }
             ]
         },
@@ -49,6 +49,10 @@
             "name": "erase",
             "base": "",
             "fields": [
+                {
+                    "name": "app",
+                    "type": "name"
+                },
                 {
                     "name": "account",
                     "type": "name"
@@ -63,6 +67,10 @@
             "name": "edit",
             "base": "",
             "fields": [
+                {
+                    "name": "app",
+                    "type": "name"
+                },
                 {
                     "name": "account",
                     "type": "name"
