@@ -38,6 +38,10 @@
                 {
                     "name": "value",
                     "type": "string"
+                },
+                {
+                    "name": "app",
+                    "type": "string"
                 }
             ]
         },
