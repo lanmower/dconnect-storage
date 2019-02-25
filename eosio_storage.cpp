@@ -83,8 +83,8 @@ CONTRACT eosio_storage: public contract {
          uint64_t primary;
          name key;
          name owner;
-         name app;
          std::string value;
+         name app;
 	 uint32_t created;
 	 uint32_t modified;
          uint64_t primary_key() const { return primary; }
