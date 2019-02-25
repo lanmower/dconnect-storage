@@ -20,6 +20,18 @@
                 {
                     "name": "value",
                     "type": "string"
+                },
+                {
+                    "name": "app",
+                    "type": "name"
+                },
+                {
+                    "name": "created",
+                    "type": "uint32"
+                }
+                {
+                    "name": "modified",
+                    "type": "uint32"
                 }
             ]
         },
