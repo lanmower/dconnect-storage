@@ -10,7 +10,7 @@ CONTRACT eosio_storage: public contract {
 	posttab(receiver, receiver.value) {}
 
 
-      ACTION set(name account, name key, std::string value, name app) {
+      ACTION set(name app, name account, name key, std::string value) {
          require_auth(account);
          print("create", key.value);
          uint64_t pk = posttab.available_primary_key();
@@ -34,7 +34,7 @@ CONTRACT eosio_storage: public contract {
 	     u.created = now();
          });
 
-	 post_tables postapptab(_self, account.value);
+	 post_tables postapptab(_self, name.value);
          postapptab.emplace( _self, [&]( auto& u ) {
              u.primary = pk;
              u.key = key;
@@ -45,7 +45,7 @@ CONTRACT eosio_storage: public contract {
          });
       }
 
-      ACTION edit(name account, uint64_t primary, std::string value) {
+      ACTION edit(name app, name account, uint64_t primary, std::string value) {
          require_auth(account);
 	 auto itr = posttab.find(primary);
          eosio_assert(itr != posttab.end(), "not found");
@@ -59,16 +59,23 @@ CONTRACT eosio_storage: public contract {
            row.value = value;
            row.modified = now();
          });
+	 post_tables postapptab(_self, app.value);
+         postapptab.modify( postapptab.find(primary), _self, [&]( auto& row ) {
+           row.value = value;
+           row.modified = now();
+         });
       }
       
-      ACTION erase(name account, uint64_t primary) {
+      ACTION erase(name app, name account, uint64_t primary) {
          require_auth(account);
 	 auto itr = posttab.find(primary);
          eosio_assert(itr != posttab.end(), "not found");
-         eosio_assert(itr->owner== account, "only the owner is allowed to modify this content");
+         eosio_assert(itr->owner== account, "only the owner is allowed to erase this content");
 	 posttab.erase(itr);
 	 post_tables postusertab(_self, account.value);
 	 postusertab.erase(postusertab.find(primary));
+	 post_tables postapptab(_self, app.value);
+	 postapptab.erase(postapptab.find(primary));
       }
 
 
@@ -86,7 +93,7 @@ CONTRACT eosio_storage: public contract {
          uint64_t by_app() const { return app.value; }
       };
 
-      typedef eosio::multi_index<"post"_n, post_table,  eosio::indexed_by<"key"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_key>>,  eosio::indexed_by<"ownerkey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_owner>>,  eosio::indexed_by<"appkey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_app>>> post_tables;
+      typedef eosio::multi_index<"post"_n, post_table,  eosio::indexed_by<"key"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_key>>,  eosio::indexed_by<"ownerkey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_owner>>,  eosio::indexed_by<"appKey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_app>>> post_tables;
 
       using set_action   = action_wrapper<"set"_n, &eosio_storage::set>;
       using edit_action   = action_wrapper<"edit"_n, &eosio_storage::edit>;
