@@ -10,7 +10,7 @@ CONTRACT eosio_storage: public contract {
 	posttab(receiver, receiver.value) {}
 
 
-      ACTION set(name account, name key, std::string value) {
+      ACTION set(name account, name key, std::string value, name app) {
          require_auth(account);
          print("create", key.value);
          uint64_t pk = posttab.available_primary_key();
@@ -24,6 +24,15 @@ CONTRACT eosio_storage: public contract {
          });
 
 	 post_tables postusertab(_self, account.value);
+         postusertab.emplace( _self, [&]( auto& u ) {
+             u.primary = pk;
+             u.key = key;
+             u.value = value;
+             u.owner = account;
+	     u.created = now();
+         });
+
+	 post_tables postapptab(_self, account.value);
          postusertab.emplace( _self, [&]( auto& u ) {
              u.primary = pk;
              u.key = key;
