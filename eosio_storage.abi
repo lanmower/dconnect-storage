@@ -41,7 +41,7 @@
                 },
                 {
                     "name": "app",
-                    "type": "string"
+                    "type": "name"
                 }
             ]
         },
@@ -102,8 +102,8 @@
             "name": "post",
             "type": "post_table",
             "index_type": "i64",
-            "key_names": ["key", "ownerKey"],
-            "key_types": ["name", "name"]
+            "key_names": ["key", "ownerKey", "appKey"],
+            "key_types": ["name", "name", "name"]
         }
     ],
     "ricardian_clauses": [],
