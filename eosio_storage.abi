@@ -107,7 +107,7 @@
     ],
     "tables": [
         {
-            "name": "post",
+            "name": "posts",
             "type": "post_table",
             "index_type": "i64",
             "key_names": ["key", "ownerkey", "appkey"],
