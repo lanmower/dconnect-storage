@@ -20,6 +20,7 @@ CONTRACT eosio_storage: public contract {
              u.key = key;
              u.value = value;
              u.owner = account;
+             u.app = app;
 	     u.created = now();
          });
 
@@ -29,15 +30,17 @@ CONTRACT eosio_storage: public contract {
              u.key = key;
              u.value = value;
              u.owner = account;
+             u.app = app;
 	     u.created = now();
          });
 
 	 post_tables postapptab(_self, account.value);
-         postusertab.emplace( _self, [&]( auto& u ) {
+         postapptab.emplace( _self, [&]( auto& u ) {
              u.primary = pk;
              u.key = key;
              u.value = value;
              u.owner = account;
+             u.app = app;
 	     u.created = now();
          });
       }
@@ -73,15 +76,17 @@ CONTRACT eosio_storage: public contract {
          uint64_t primary;
          name key;
          name owner;
+         name app;
          std::string value;
-	 uint32_t created;       
-	 uint32_t modified;       
+	 uint32_t created;
+	 uint32_t modified;
          uint64_t primary_key() const { return primary; }
          uint64_t by_key() const { return key.value; }
          uint64_t by_owner() const { return owner.value; }
+         uint64_t by_app() const { return app.value; }
       };
 
-      typedef eosio::multi_index<"post"_n, post_table,  eosio::indexed_by<"key"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_key>>,  eosio::indexed_by<"ownerkey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_owner>>> post_tables;
+      typedef eosio::multi_index<"post"_n, post_table,  eosio::indexed_by<"key"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_key>>,  eosio::indexed_by<"ownerkey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_owner>>,  eosio::indexed_by<"appkey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_app>>> post_tables;
 
       using set_action   = action_wrapper<"set"_n, &eosio_storage::set>;
       using edit_action   = action_wrapper<"edit"_n, &eosio_storage::edit>;
