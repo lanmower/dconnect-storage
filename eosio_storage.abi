@@ -110,7 +110,7 @@
             "name": "post",
             "type": "post_table",
             "index_type": "i64",
-            "key_names": ["key", "ownerKey", "appKey"],
+            "key_names": ["key", "ownerkey", "appkey"],
             "key_types": ["name", "name", "name"]
         }
     ],
