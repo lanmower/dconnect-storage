@@ -10,7 +10,7 @@ cleos set contract <contract name> ./
 ## ACTIONS
 precede each action with the users name
 
-(replace the bits in <> brackets with your own information)
+(remove the <> brackets and add your own information)
 
 ```cleos push action <contract name> set '[ "<user name>","<table key>","<value>" ]' -p <user name>@active```
 # SET - create an entry
