@@ -95,8 +95,8 @@ CONTRACT eosio_storage: public contract {
 
       typedef eosio::multi_index<"posts"_n, post_table,  eosio::indexed_by<"key"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_key>>,  eosio::indexed_by<"ownerkey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_owner>>,  eosio::indexed_by<"appkey"_n, eosio::const_mem_fun<post_table, uint64_t, &post_table::by_app>>> post_tables;
 
-      using set_action   = action_wrapper<"set"_n, &eosio_storage::set>;	
-      using edit_action   = action_wrapper<"edit"_n, &eosio_storage::edit>;
+      using set_action     = action_wrapper<  "set"_n, &eosio_storage::set>;	
+      using edit_action    = action_wrapper< "edit"_n, &eosio_storage::edit>;
       using erase_action   = action_wrapper<"erase"_n, &eosio_storage::erase>;
       private:
         post_tables posttab;
